@@ -103,4 +103,85 @@ function deleteTask(id) {
   writeTask(filteredTasks); //Write the updated tasks array to the file
   console.log("Task deleted successfully with the ID:", id); //Log the success message with the ID of the deleted task
 }
-
+//status filter function to get tasks by status
+function listTaskFilter(statusFilter = null){//Function to list tasks with an optional status filter
+  const tasks =readTask(); //Read the current tasks from the file
+  let filteredTasks = tasks; //Initialize the filtered tasks to all tasks
+  if (statusFilter){
+    filteredTasks = tasks.filter(task => task.status === statusFilter);
+    //If a status filter is provided, filter the tasks by the given status
+  }
+  if(filteredTasks.length === 0){
+    console.log(statusFilter ? `No ${statusFilter} tasks found.` : "No tasks found.");
+    //If no tasks are found, log a message indicating that
+    return;
+    //If no tasks are found, log a message and exit the function
+  }
+  console.log(`Tasks (${statusFilter || "all"}):`); //Log the status filter or "all" if no filter is provided
+  filteredTasks.forEach(task => {
+    console.log(`- ID: ${task.id}`);
+    console.log(` Description: ${task.description}`);
+    console.log(` Status: ${task.status}`);
+    console.log(` Created: ${task.createdAt}`);
+    console.log(` Update: ${task.updateAt}`);
+    console.log("--------");
+  });
+}
+function main() {
+  initTaskFile(); //Initialize the tasks file if it doesn't exist
+  const args = process.argv.slice(2); //Get the command line arguments, excluding the first two (node and script name)
+  const command = args[0]; //The first argument is the command (add, update, delete, list, etc.)
+  switch (command){
+    case "add":
+      if (args.length < 2 ){
+        console.error('Usage: node task-trader.js add "task description"');
+        break; //If the command is "add", check if a description is provided
+      }
+      addTask(args[1]); //Call the addTask function with the provided description
+      break;
+      case "update":
+        if (args.length < 3){
+          console.error('Usage: node task-tracker.js update taskID " new description');
+          break; //If the command is "update", check if an ID and a new description are provided
+        }
+        case 'status':
+          if(args.length <3){
+            console.error('Usage: node task-tracker.js status taskId newStatus'); //If the command is "status", check if an ID and a new status are provided
+            break;
+          }
+          updateTaskStatus(args[1],args[2]); //Call the updateTaskStatus function with the provided ID and new status
+          break;
+           
+          case "delete" :
+            if(args.length < 2){
+              console.error('Usage: node task-tracker.js delete taskId');
+              break; //If the command is "delete", check if an ID is provided
+            }
+            deleteTask(args[1]); //Call the deleteTask function with the provided ID
+            break;
+            case "list":
+              listTaskFilter(args[1]); //If the command is "list", call the listTaskFilter function with the provided status filter
+              break;
+              case "list-todo":
+                listTasks("todo"); //If the command is "list-todo", call the listTaskFilter function with "todo" status
+                break;
+                case "list-in-progress":
+                  listTasks("in-progress"); //If the command is "list-in-progress", call the listTaskFilter function with "in-progress" status
+                  break;
+                  case "list-done":
+                    listTasks("done");
+                    break;
+                    default:
+                      console.log("Available commands:");
+                      console.log(' add "description" - Add a new task');
+                      console.log(' update taskId "new description" - Update an existing task');
+                      console.log(' status taskId newStatus - Update the status of an existing task');
+                      console.log(' delete taskId - Delete a task');
+                      console.log(' list - List all tasks');
+                      console.log(' list-todo - List all todo tasks');
+                      console.log(' list-in-progress - List all in-progress tasks');
+                      console.log(' list-done - List all done tasks');
+  }
+}
+main(); //Call the main function to start the task tracker
+//This is the main function that initializes the task file and processes the command line arguments
